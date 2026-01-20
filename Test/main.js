@@ -1,29 +1,65 @@
-const { app, BrowserWindow ,globalShortcut,dialog,Tray,Menu} = require('electron');
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow ,globalShortcut,dialog,Tray,Menu,shell,ipcMain} = require('electron');
 const path = require('path');
 const windowstateKeeper = require('electron-window-state');
 
 
+
+
+
+ipcMain.on('msg',(event,arg)=>{
+    console.log("Message received from Renderer Process");
+    console.log(arg);
+    ipcMain.emit('reply1','Hello from Main Process');
+    event.reply('reply2','Hello from Main Process');
+});
+
+
+
+
+// let template=[{label:'Blog',submenu:[{label:'Visit',click:()=>{
+//     console.log("Visiting Blog");
+// }}]},
+// {label:'About',submenu:[{label:'Version 1.0.0'},{label:'Author: Your Name'}]},
+// {label:'Close',role:'close'}];
+
+// let menu=Menu.buildFromTemplate(template);
+// Menu.setApplicationMenu(menu);
+
+
+
+
+
+let template=[{label:'Blog',submenu:[{label:'Visit',click:()=>{
+    console.log("Visiting Blog");
+}}]},
+{label:'About',submenu:[{label:'Version 1.0.0'},{label:'Author: Your Name'}]},
+{label:'Close',role:'close'}];
+
+let ContextMenu=Menu.buildFromTemplate(template);
+
+
+
+
+
 function createWindow() {
     const mainWindowState=windowstateKeeper({
-        defaultWidth:500,
-        defaultHeight:600
+        defaultWidth:120,
+        defaultHeight:150
     })
     const win = new BrowserWindow({
         x: mainWindowState.x,
         y: mainWindowState.y,
-        width: mainWindowState.width,
-        height: mainWindowState.height,
+        width: 800,
+        height: 900,
         alwaysOnTop: true,
         devtools: true,
         // autoHideMenuBar: true,
-        autoHideMenuBar: true,
         // frame: false,
         // resizable: false,
         title:"Tic Tac Toe",
         webPreferences: {
             nodeIntegration: true,
-            preload: path.join(__dirname, 'preload.js')
+            // preload: path.join(__dirname, 'preload.js')
         }
     });
 
@@ -36,18 +72,22 @@ function createWindow() {
 
 
     let wc =win.webContents;
-    wc.on('dom-ready',()=>{
-        console.log("DOM Ready");
-    });
-    wc.on('did-finish-load',()=>{
-        console.log("Finished Loading");
-    });
-    wc.on('before-input-event',(event, input)=>{
-        // console.log(`Key Pressed: ${input.key}`);
-        // if(input.key==="F12"){
-        //     event.preventDefault();
-        // }
-    });
+    // wc.on('dom-ready',()=>{
+    //     console.log("DOM Ready");
+    // });
+    // wc.on('did-finish-load',()=>{
+    //     console.log("Finished Loading");
+    // });
+    // wc.on('before-input-event',(event, input)=>{
+    //     // console.log(`Key Pressed: ${input.key}`);
+    //     // if(input.key==="F12"){
+    //     //     event.preventDefault();
+    //     // }
+    // });
+
+    wc.on('context-menu',()=>{
+        ContextMenu.popup()
+    })
 
 
 
@@ -133,24 +173,23 @@ app.on('ready',()=>{
     });
 });
 
-app.on('before-quit',(e)=>{
-    // app.quit();
-    console.warn("Quitting");
-    e.preventDefault();
-});
+// app.on('before-quit',(e)=>{
+//     // app.quit();
+//     console.warn("Quitting");
+//     e.preventDefault();
+// });
 
-app.on('will-quit',(e)=>{
-    console.warn("Will Quit");
-    e.preventDefault();
-})
+// app.on('will-quit',(e)=>{
+//     console.warn("Will Quit");
+//     e.preventDefault();
+// })
 
-app.on('browser-window-focus',()=>{
-    console.log("Focused");
-})
+// app.on('browser-window-focus',()=>{
+//     console.log("Focused");
+// })
 
-app.on('browser-window-blur',()=>{
-    console.log("Blurred");
-})
+// app.on('browser-window-blur',()=>{
+//     console.log("Blurred");
+// })
 
 // app.whenReady().then(createWindow);
-app.on('ready',createWindow);
