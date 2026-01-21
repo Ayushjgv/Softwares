@@ -1,0 +1,22 @@
+textarea{
+    width: 100vw;
+    height: 100vh;
+    backdrop-filter: blur(25px);
+    border: none;
+    outline: none;
+    font-size: 16px;
+    padding: 20px;
+    box-sizing: border-box;
+    background: rgba(255, 255, 255, 0.2);
+    color: #000;
+    -webkit-backdrop-filter: blur(25px);
+
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.container{
+    margin:0;
+    padding:0;
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    /* background: rgba(255, 255, 255, 0.2); */
+}

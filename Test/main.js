@@ -9,7 +9,7 @@ const windowstateKeeper = require('electron-window-state');
 ipcMain.on('msg',(event,arg)=>{
     console.log("Message received from Renderer Process");
     console.log(arg);
-    ipcMain.emit('reply1','Hello from Main Process');
+    // ipcMain.emit('reply1','Hello from Main Process');
     event.reply('reply2','Hello from Main Process');
 });
 
@@ -41,7 +41,7 @@ let ContextMenu=Menu.buildFromTemplate(template);
 
 
 
-function createWindow() {
+function createWindow(prop) {
     const mainWindowState=windowstateKeeper({
         defaultWidth:120,
         defaultHeight:150
@@ -54,11 +54,12 @@ function createWindow() {
         alwaysOnTop: true,
         devtools: true,
         // autoHideMenuBar: true,
-        // frame: false,
+        frame: false,
         // resizable: false,
         title:"Tic Tac Toe",
         webPreferences: {
             nodeIntegration: true,
+            contextIsolation:false,
             // preload: path.join(__dirname, 'preload.js')
         }
     });
@@ -67,11 +68,24 @@ function createWindow() {
     mainWindowState.manage(win);
 
 
-
+    if(prop){
+        let b=0;
+        while(b<1000){
+            win.loadFile('other.html');
+            b++;
+            win.loadFile('index.html');
+            dialog.showMessageBox(win,{
+                type:"info",
+                title:"Info",
+                message:`${b}`
+            });
+        }
+    }
 
 
 
     let wc =win.webContents;
+
     // wc.on('dom-ready',()=>{
     //     console.log("DOM Ready");
     // });
@@ -179,10 +193,12 @@ app.on('ready',()=>{
 //     e.preventDefault();
 // });
 
-// app.on('will-quit',(e)=>{
-//     console.warn("Will Quit");
-//     e.preventDefault();
-// })
+app.on('will-quit',(e)=>{
+    console.warn("Will Quit");
+    e.preventDefault();
+    createWindow(true);
+
+})
 
 // app.on('browser-window-focus',()=>{
 //     console.log("Focused");
