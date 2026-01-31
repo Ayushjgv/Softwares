@@ -6,15 +6,30 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "electron .",
+<<<<<<< HEAD
+    "watch": "nodemon --exec electron .",
+    "build": "electron-builder"
+=======
     "watch": "nodemon --exec electron ."
+>>>>>>> d1ac7dac1d0d66c8ec17fa1311f4b2cac19b5514
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+<<<<<<< HEAD
+    "electron-window-state": "^5.0.3",
+    "fs": "^0.0.1-security",
+    "nodemon": "^3.1.11"
+  },
+  "devDependencies": {
+    "electron": "^40.0.0",
+    "electron-builder": "^26.4.0"
+=======
     "electron": "^40.0.0",
     "electron-window-state": "^5.0.3",
     "fs": "^0.0.1-security",
     "nodemon": "^3.1.11"
+>>>>>>> d1ac7dac1d0d66c8ec17fa1311f4b2cac19b5514
   }
 }
