@@ -5,11 +5,17 @@ contextBridge.exposeInMainWorld("api",{
     openFile:()=>{
         return ipcRenderer.invoke('open-file-dialog');
     },
-    saveFile:(data)=>{
-        return ipcRenderer.invoke('save-file-dialog', data);
+    saveFile:(data,path)=>{
+        return ipcRenderer.invoke('save-file-dialog', data,path);
     },
     pin:()=>{
         return ipcRenderer.invoke('pin');
+    },
+    CreateSnapshot:(data)=>{
+        return ipcRenderer.invoke('create-snapshot',data);
+    },
+    RestoreSnapshot:()=>{
+        return ipcRenderer.invoke('restore-snapshot');
     }
 });
 
@@ -21,5 +27,9 @@ contextBridge.exposeInMainWorld('electron', {
   onSave: (callback) => ipcRenderer.on('file-save', (event,filepath)=>{
     callback(filepath);
   }),
-  saveFile: (text) => ipcRenderer.invoke('save-file-dialog', text)
+  saveFile: (text) => ipcRenderer.invoke('save-file-dialog', text),
+  getfilepaths:(callback)=>ipcRenderer.on('filepaths',(event,filepaths)=>{
+    callback(filepaths);
+  }),
+  open:(path)=> ipcRenderer.invoke('openfile',path)
 });

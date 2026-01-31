@@ -107,7 +107,8 @@ button:hover{
     width: 250px;
     height: 100vh;
 
-    background-color: white;
+    /* background-color: white; */
+    backdrop-filter: blur(10px);
     border: 1px solid black;
     padding: 20px;
 
@@ -127,4 +128,29 @@ button:hover{
 #close{
     background-color: red;
     width: fit-content;
+}
+
+
+/* files .container */
+
+#filescontainer {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.file-item {
+    padding: 8px;
+    border: 1px solid #aaa;
+    border-radius: 5px;
+    cursor: pointer;
+    background: rgba(0, 0, 0, 0);
+    backdrop-filter: blur(10px);
+    transition: 0.3s;
+    font-size: 14px;
+    word-break: break-all;
+}
+
+.file-item:hover {
+    background: cyan;
 }
