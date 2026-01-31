@@ -1,7 +1,6 @@
 const open = document.getElementById('open');
 const save = document.getElementById('save');
 const editor = document.getElementById('editor');
-<<<<<<< HEAD
 const lines = document.getElementById('lines');
 const wrap = document.getElementById('wrap');
 const sidebarbtn=document.getElementById('sidebarbtn');
@@ -15,8 +14,6 @@ const pin=document.getElementById('pin');
 wrap.addEventListener('click', () => {
     editor.wrap = editor.wrap === "off" ? "soft" : "off";
 });
-=======
->>>>>>> d1ac7dac1d0d66c8ec17fa1311f4b2cac19b5514
 
 open.addEventListener('click', async () => {
     const res = await window.api.openFile();
@@ -36,7 +33,6 @@ save.addEventListener('click', async () => {
 
 
 
-<<<<<<< HEAD
 //line numbers
 
 
@@ -101,7 +97,12 @@ window.electron.onFileOpened((filepath, content) => {
 
   console.log("opened file path : ",filepath);
 });
-=======
+
+
+window.electron.onSave(async (filepath)=>{
+    const data=editor.value;
+    await window.api.saveFile(data);
+});
 
 
 
@@ -109,11 +110,3 @@ window.electron.onFileOpened((filepath, content) => {
 
 
 
-
-
-
-
-
-
-
->>>>>>> d1ac7dac1d0d66c8ec17fa1311f4b2cac19b5514

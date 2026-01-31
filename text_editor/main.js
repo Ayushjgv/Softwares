@@ -1,21 +1,10 @@
-<<<<<<< HEAD
 const { app, BrowserWindow, dialog, ipcMain ,shell,Menu} = require('electron');
-=======
-const { app, BrowserWindow, dialog, ipcMain ,shell} = require('electron');
->>>>>>> d1ac7dac1d0d66c8ec17fa1311f4b2cac19b5514
 const fs = require('fs');
 const path = require('path');
 const windowKeeper=require('electron-window-state');
 
 
-<<<<<<< HEAD
 let filepaths=[];
-=======
-
-
-
-
->>>>>>> d1ac7dac1d0d66c8ec17fa1311f4b2cac19b5514
 
 
 
@@ -28,24 +17,18 @@ ipcMain.handle('open-file-dialog',async()=>{
 
     if(result.canceled) return null;
 
-<<<<<<< HEAD
     //add in filepaths with tabno.
     if(!filepaths[0]) filepaths.push(result.filePaths[0]);
     else filepaths[0]=result.filePaths[0];
 
     const content = fs.readFileSync(result.filePaths[0],'utf-8');
     // console.log(content);
-=======
-    const content = fs.readFileSync(result.filePaths[0],'utf-8');
-    console.log(content);
->>>>>>> d1ac7dac1d0d66c8ec17fa1311f4b2cac19b5514
     return content;
 
 });
 
 
 ipcMain.handle("save-file-dialog", async (event, text) => {
-<<<<<<< HEAD
   if(filepaths[0]){
     fs.writeFileSync(filepaths[0],text);
   }
@@ -61,16 +44,6 @@ ipcMain.handle("save-file-dialog", async (event, text) => {
   }
 
   
-=======
-  const result = await dialog.showSaveDialog({
-    filters: [{ name: "Text Files", extensions: ["txt"] }]
-  });
-
-  if (result.canceled) return;
-
-  fs.writeFileSync(result.filePath, text);
-  return true;
->>>>>>> d1ac7dac1d0d66c8ec17fa1311f4b2cac19b5514
 });
 
 
@@ -85,18 +58,6 @@ ipcMain.handle("save-file-dialog", async (event, text) => {
 
 
 
-<<<<<<< HEAD
-=======
-
-
-
-
-
-
-
-
-
->>>>>>> d1ac7dac1d0d66c8ec17fa1311f4b2cac19b5514
 function createWindow() {
     const mainWindowState=windowKeeper({
         defaultWidth:850,
@@ -108,25 +69,12 @@ function createWindow() {
     y: mainWindowState.y,
     width: mainWindowState.width,
     height: mainWindowState.height,
-<<<<<<< HEAD
     // transparent:true,
     hasShadow:true,
     // frame:false,
     // devtools:true,
     webPreferences: {
         // devtools:true,
-=======
-
-    transparent:true,
-    hasShadow:false,
-    // frame:false,
-    vibrancy:'ultra-dark',
-    backgroundmaterial:'acrylic',
-
-    // alwaysOnTop:true,
-    devtools:true,
-    webPreferences: {
->>>>>>> d1ac7dac1d0d66c8ec17fa1311f4b2cac19b5514
         contextIsolation:true,
         nodeIntegration:false,
         preload: path.join(__dirname, "preload.js")
@@ -134,7 +82,6 @@ function createWindow() {
   });
 
   win.loadFile("index.html");
-<<<<<<< HEAD
 
   //devtools
 
@@ -177,7 +124,10 @@ function createWindow() {
             });
 
             if (!canceled) {
-              const content = fs.readFileSync(result.filePaths[0],'utf-8');
+              const content = fs.readFileSync(filePaths[0],'utf-8');
+              if(!filepaths[0]) filepaths.push(filePaths[0]);
+              else filepaths[0]=filePaths[0];
+              console.log(filePaths[0]);
               win.webContents.send('file-opened', filePaths[0],content);
             }
           }
@@ -188,7 +138,7 @@ function createWindow() {
       label:'Save',
       accelerator:'Ctrl+S',
       click:()=>{
-        win.webContents.send('file-save');
+        win.webContents.send('file-save',filepaths);
       }
     }
   ];
@@ -204,35 +154,3 @@ function createWindow() {
 
 
 app.whenReady().then(createWindow);
-=======
-}
-
-
-
-app.whenReady().then(createWindow);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
->>>>>>> d1ac7dac1d0d66c8ec17fa1311f4b2cac19b5514
