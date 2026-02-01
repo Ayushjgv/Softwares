@@ -50,12 +50,12 @@ function createWindow() {
   //devtools
 
   win.webContents.on('before-input-event', (event, input) => {
-  //   if (
-  //     (input.control && input.shift && input.key.toLowerCase() === 'i') ||
-  //     input.key === 'F12'
-  //   ) {
-  //     event.preventDefault();
-  //   }
+    if (
+      (input.control && input.shift && input.key.toLowerCase() === 'i') ||
+      input.key === 'F12'
+    ) {
+      event.preventDefault();
+    }
 
   });
 
