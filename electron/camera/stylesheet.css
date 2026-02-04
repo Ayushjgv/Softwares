@@ -29,3 +29,48 @@
     gap: 10px;              
     padding: 10px;
 }
+#slider > * {
+    flex: 0 0 auto;
+}
+button {
+    width: fit-content;
+    padding: 8px 14px;
+    border-radius: 6px;
+    border: none;
+    background: #2e86de;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+button:hover {
+    background: #1b6ac9;
+    transform: translateY(-1px);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+select{
+    width: fit-content;
+    padding: 5px;
+    margin: 5px;
+    border: 1px solid black;
+    border-radius: 5px;
+}
+#slider::-webkit-scrollbar {
+    display: none;
+}
+
+
+
+
+
+
+
+
+
+
+
