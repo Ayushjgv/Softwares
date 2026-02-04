@@ -116,6 +116,7 @@ button:hover{
     z-index: 999;
 
     display: flex;
+    flex-wrap: wrap;
     flex-direction: column;
     gap: 10px;
 }
@@ -126,8 +127,16 @@ button:hover{
 
 
 #close{
-    background-color: red;
+    background-color: rgba(255, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
     width: fit-content;
+    height: fit-content;
+}
+#add{
+    /* background: rgba(0, 0, 255, 0.1); */
+    backdrop-filter: blur(10px);
+    width: fit-content;
+    height: fit-content;
 }
 
 

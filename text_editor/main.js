@@ -34,6 +34,7 @@ function createWindow() {
       // transparent:true,
       hasShadow:true,
       // frame:false,
+      setAlwaysOnTop:true,
       devtools:true,
       webPreferences: {
           devtools:true,
@@ -88,10 +89,15 @@ function createWindow() {
 
             if (!canceled) {
               const content = fs.readFileSync(filePaths[0],'utf-8');
-              if(!filepaths.includes(filePaths[0])){
-                filepaths.push(filePaths[0]);
-                currfilepath=filePaths[0];
+              if(!filepaths.some(f => f.path === filePaths[0])){
+                  filepaths.push({
+                      path: filePaths[0],
+                      content: content
+                  });
               }
+
+              currfilepath = filePaths[0];
+
 
 
               console.log(filePaths[0]);
@@ -127,29 +133,40 @@ function createWindow() {
       });
 
       if(result.canceled) return null;
+      const Content = fs.readFileSync(result.filePaths[0],'utf-8');
 
       //add in filepaths with tab no.
-      if(!filepaths.includes(result.filePaths[0])){
-        filepaths.push(result.filePaths[0]);
-        currfilepath=result.filePaths[0];
+      if(!filepaths.some(f=>f.path===result.filePaths[0])){
+        filepaths.push({
+          path:result.filePaths[0],
+          content:Content
+        })
       }
       
-      const content = fs.readFileSync(result.filePaths[0],'utf-8');
+
+      currfilepath = result.filePaths[0];
+      
       
 
       //emit to send filepaths
       win.webContents.send('filepaths',filepaths);
       win.setTitle("NotePad - " + result.filePaths[0]);
+      console.log(filepaths);
+      return {
+          path: result.filePaths[0],
+          content: Content
+      };
 
-      return content;
 
   });
 
 
-  ipcMain.handle("save-file-dialog", async (event, text,filepath) => {
-    if(filepath){
+  ipcMain.handle("save-file-dialog", async (event, text,filepath,FilePaths) => {
+    if(filepaths.some(f=>f.path===filepath)){
       fs.writeFileSync(filepath,text);
       console.log(filepath);
+      filepaths=FilePaths; 
+      return true;
     }
     else{
       console.log(filepath);
@@ -159,11 +176,19 @@ function createWindow() {
 
       if (result.canceled) return;
 
+      filepaths.push({
+        path:result.filePath,
+        content:text
+      })
+
       fs.writeFileSync(result.filePath, text);
+      currfilepath = result.filePath;
+      win.webContents.send('filepaths', filepaths);
+      filepaths=FilePaths; 
       return true;
     }
 
-    
+     
   });
 
   ipcMain.handle('openfile',(event,path)=>{

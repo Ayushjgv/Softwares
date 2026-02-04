@@ -1,0 +1,31 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    width: 98vw;
+}
+
+.container{
+    background: rgb(36, 34, 34);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap:10px;
+    /* overflow: hidden; */
+    /* width: 100vw; */
+}
+
+#camera{
+    width: 98vw;
+}
+
+#slider {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;       
+    overflow-y: hidden;     
+    white-space: nowrap;   
+    gap: 10px;              
+    padding: 10px;
+}

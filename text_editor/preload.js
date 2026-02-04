@@ -6,7 +6,7 @@ contextBridge.exposeInMainWorld("api",{
         return ipcRenderer.invoke('open-file-dialog');
     },
     saveFile:(data,path)=>{
-        return ipcRenderer.invoke('save-file-dialog', data,path);
+        return ipcRenderer.invoke('save-file-dialog', data,path,FilePaths);
     },
     pin:()=>{
         return ipcRenderer.invoke('pin');
