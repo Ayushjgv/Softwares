@@ -14,40 +14,81 @@ const add = document.getElementById('add');
 
 let currfile;
 let autoSaveTimer = null;
-
+let file;
 
 
 
 let FilePaths = [];
 
-//open save files
+//wrap on off
 
 wrap.addEventListener('click', () => {
     editor.wrap = editor.wrap === "off" ? "soft" : "off";
 });
 
+//open save files
+
 open.addEventListener('click', async () => {
     const res = await window.api.openFile();
 
-    console.log("File content:", res);
+    // console.log("File content:", res);
 
     if (res) {
         editor.value = res.content;
         currfile = res.path;
+        if(!FilePaths.some(file=>file.path===res.path)) FilePaths.push(res);
+        updatesidebar();
     }
 });
 
 
 save.addEventListener('click', async () => {
-    const data = editor.value;
-    const file = FilePaths.find(f => f.path === currfile);
+    if(currfile!=''){
+        const data = editor.value;
+        file = FilePaths.find(f => f.path === currfile);
 
-    if (file) {
-        file.content = data;
+        if (file) {
+            file.content = data;
+        }
+
+        await window.api.saveFile(data, currfile);
     }
-
-    await window.api.saveFile(data, currfile, FilePaths);
+    else{
+        const data=editor.value;
+        file = FilePaths.find(f => f.path === currfile);
+        if (file) {
+            file.content = data;
+        }
+        const path=await window.api.saveFile(data, currfile);
+        file.path=path;
+        currfile=path;
+        updatesidebar();
+    }
 });
+
+//updatesidebar
+
+function updatesidebar(){
+    filescontainer.innerHTML='';
+    FilePaths.forEach((f, index) => {
+        const div = document.createElement("div");
+        div.classList.add("file-item");
+
+        let name = f.path.substring(f.path.lastIndexOf("/") + 1);
+
+        div.dataset.index = index;
+        div.textContent = name;
+
+        filescontainer.appendChild(div);
+
+
+        div.addEventListener('click', async () => {
+            currfile=f.path;
+            editor.value=f.content;
+        });
+
+    });
+}
 
 
 //snapshot
@@ -55,11 +96,11 @@ save.addEventListener('click', async () => {
 
 createSnapshot.addEventListener('click', async () => {
     const data = editor.value;
-    await window.api.CreateSnapshot(data);
+    await window.api.CreateSnapshot(data,currfile);
 });
 
 getSnapshot.addEventListener('click', async () => {
-    const snapshot = await window.api.RestoreSnapshot();
+    const snapshot = await window.api.RestoreSnapshot(currfile);
 
     if (snapshot) {
         editor.value = snapshot;
@@ -106,13 +147,10 @@ function autosave() {
 
     autoSaveTimer = setTimeout(async () => {
         const data = editor.value;
-        // await window.api.saveFile(data,currfile);
         const file = FilePaths.find(f => f.path === currfile);
-
         if (file) {
             file.content = data;
         }
-
     }, 1000);
 }
 
@@ -154,13 +192,15 @@ pin.addEventListener('click', async () => {
 
 //shortcut controls
 
-window.electron.onFileOpened((filepath, content) => {
-    editor.value = content;
-    currfile = filepath;
+window.electron.onFileOpened((files) => {
+    editor.value = files.content;
+    currfile = files.path;
+    if(!FilePaths.some(file=>file.path===files.path)) FilePaths.push(files);
+    updatesidebar();
 });
 
 
-window.electron.onSave(async (filepath) => {
+window.electron.onSave(async () => {
     const data = editor.value;
     const file = FilePaths.find(f => f.path === currfile);
 
@@ -168,55 +208,8 @@ window.electron.onSave(async (filepath) => {
         file.content = data;
     }
 
-    await window.api.saveFile(data, currfile, FilePaths);
+    await window.api.saveFile(data, currfile);
 });
-
-
-
-//sidepanel multiple files at a time
-
-
-
-window.electron.getfilepaths((filepaths) => {
-    FilePaths = filepaths;
-    filescontainer.innerHTML = "";
-
-    FilePaths.forEach((f, index) => {
-        const div = document.createElement("div");
-        div.classList.add("file-item");
-
-        let name = f.path.substring(f.path.lastIndexOf("/") + 1);
-
-        div.dataset.index = index;
-        div.textContent = name;
-
-        filescontainer.appendChild(div);
-
-
-        div.addEventListener('click', async () => {
-            const res = await window.electron.open(f.path);
-            currfile=f.path;
-            if (res) {
-                editor.value = res;
-            }
-            // updateContent(f.path);
-        });
-
-    });
-});
-
-
-// function updateContent(currf) {
-//     const file = FilePaths.find(f => f.path === currf);
-
-//     if (file) {
-//         editor.value = file.content;
-//         currfile = currf;
-//     }
-// }
-
-
-
 
 
 //add button functionality
@@ -224,55 +217,14 @@ window.electron.getfilepaths((filepaths) => {
 
 
 
-// add.addEventListener('click', () => {
-
-//     // Create a temporary untitled file object
-//     const newFile = {
-//         path: "",
-//         content: ""
-//     };
-
-//     // Add to array
-//     FilePaths.push(newFile);
-
-//     // Update current file
-//     currfile = newFile.path;
-
-//     // Clear editor
-//     editor.value = "";
-
-//     // Refresh sidebar UI
-//     renderFileList();
-// });
-
-
-// function renderFileList() {
-//     filescontainer.innerHTML = "";
-
-//     FilePaths.forEach((f, index) => {
-//         const div = document.createElement("div");
-//         div.classList.add("file-item");
-
-//         let name = f.path.substring(f.path.lastIndexOf("/") + 1);
-
-//         div.dataset.index = index;
-//         div.textContent = name;
-
-//         // highlight active file
-//         if (f.path === currfile) {
-//             // div.style.background = "#333";
-//         }
-
-//         filescontainer.appendChild(div);
-
-//         div.addEventListener('click', () => {
-//             updateContent(f.path);
-//         });
-//     });
-// }
-
-
-
-
-
+add.addEventListener('click', () => {
+    const newFile = {
+        path: "",
+        content: ""
+    };
+    FilePaths.push(newFile);
+    currfile = newFile.path;
+    editor.value = '';
+    updatesidebar();
+});
 

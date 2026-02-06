@@ -6,30 +6,23 @@ contextBridge.exposeInMainWorld("api",{
         return ipcRenderer.invoke('open-file-dialog');
     },
     saveFile:(data,path)=>{
-        return ipcRenderer.invoke('save-file-dialog', data,path,FilePaths);
+        return ipcRenderer.invoke('save-file-dialog', data,path);
     },
     pin:()=>{
         return ipcRenderer.invoke('pin');
     },
-    CreateSnapshot:(data)=>{
-        return ipcRenderer.invoke('create-snapshot',data);
+    CreateSnapshot:(data,currfile)=>{
+        return ipcRenderer.invoke('create-snapshot',data,currfile);
     },
-    RestoreSnapshot:()=>{
-        return ipcRenderer.invoke('restore-snapshot');
+    RestoreSnapshot:(currfile)=>{
+        return ipcRenderer.invoke('restore-snapshot',currfile);
     }
 });
 
 
 contextBridge.exposeInMainWorld('electron', {
-  onFileOpened: (callback) => ipcRenderer.on('file-opened',(event,filepath,content)=>{
-    callback(filepath,content);
+  onFileOpened: (callback) => ipcRenderer.on('file-opened',(event,temp)=>{
+    callback(temp);
   }),
-  onSave: (callback) => ipcRenderer.on('file-save', (event,filepath)=>{
-    callback(filepath);
-  }),
-  saveFile: (text) => ipcRenderer.invoke('save-file-dialog', text),
-  getfilepaths:(callback)=>ipcRenderer.on('filepaths',(event,filepaths)=>{
-    callback(filepaths);
-  }),
-  open:(path)=> ipcRenderer.invoke('openfile',path)
+  onSave: (callback) => ipcRenderer.on('file-save', (callback)),
 });

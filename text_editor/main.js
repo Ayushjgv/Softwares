@@ -1,22 +1,14 @@
-const { app, BrowserWindow, dialog, ipcMain ,shell,Menu} = require('electron');
+const { app, BrowserWindow, dialog, ipcMain ,shell,Menu,globalShortcut} = require('electron');
 const fs = require('fs');
 const path = require('path');
 const windowKeeper=require('electron-window-state');
 
 const snapshotsDir = path.join(app.getPath("userData"), "snapshots");
-
+let temp;
 if (!fs.existsSync(snapshotsDir)) {
   fs.mkdirSync(snapshotsDir);
 }
-
 const snapshotFile = path.join(app.getPath("userData"), "snapshot.txt");
-
-
-
-
-let filepaths=[];
-let currfilepath;
-
 
 
 
@@ -89,20 +81,8 @@ function createWindow() {
 
             if (!canceled) {
               const content = fs.readFileSync(filePaths[0],'utf-8');
-              if(!filepaths.some(f => f.path === filePaths[0])){
-                  filepaths.push({
-                      path: filePaths[0],
-                      content: content
-                  });
-              }
-
-              currfilepath = filePaths[0];
-
-
-
-              console.log(filePaths[0]);
-              win.webContents.send('file-opened', filePaths[0],content);
-              win.webContents.send('filepaths',filepaths);
+              temp={path:filePaths[0],content:content}
+              win.webContents.send('file-opened', temp);
               win.setTitle("NotePad - " + filePaths[0]);
             }
           }
@@ -113,8 +93,7 @@ function createWindow() {
       label:'Save',
       accelerator:'Ctrl+S',
       click:()=>{
-        win.webContents.send('file-save',currfilepath);
-        console.log(currfilepath);
+        win.webContents.send('file-save');
       }
     }
   ];
@@ -131,64 +110,29 @@ function createWindow() {
           filters:[{name:'Text Files',extensions:['txt','md','js','json','html','css']},
           {name:'All Files',extensions:['*']}]
       });
-
       if(result.canceled) return null;
       const Content = fs.readFileSync(result.filePaths[0],'utf-8');
-
-      //add in filepaths with tab no.
-      if(!filepaths.some(f=>f.path===result.filePaths[0])){
-        filepaths.push({
-          path:result.filePaths[0],
-          content:Content
-        })
-      }
-      
-
-      currfilepath = result.filePaths[0];
-      
-      
-
-      //emit to send filepaths
-      win.webContents.send('filepaths',filepaths);
       win.setTitle("NotePad - " + result.filePaths[0]);
-      console.log(filepaths);
       return {
           path: result.filePaths[0],
           content: Content
       };
-
-
   });
 
 
-  ipcMain.handle("save-file-dialog", async (event, text,filepath,FilePaths) => {
-    if(filepaths.some(f=>f.path===filepath)){
+  ipcMain.handle("save-file-dialog", async (event, text,filepath) => {
+    if(filepath!=''){
       fs.writeFileSync(filepath,text);
-      console.log(filepath);
-      filepaths=FilePaths; 
       return true;
     }
-    else{
-      console.log(filepath);
+    else {
       const result = await dialog.showSaveDialog({
         filters: [{ name: "Text Files", extensions: ["txt"] }]
       });
-
       if (result.canceled) return;
-
-      filepaths.push({
-        path:result.filePath,
-        content:text
-      })
-
       fs.writeFileSync(result.filePath, text);
-      currfilepath = result.filePath;
-      win.webContents.send('filepaths', filepaths);
-      filepaths=FilePaths; 
-      return true;
+      return result.filePath;
     }
-
-     
   });
 
   ipcMain.handle('openfile',(event,path)=>{
@@ -202,19 +146,19 @@ function createWindow() {
 
   // SNAPSHOT SYSTEM
 
-  ipcMain.handle('create-snapshot', (event, data) => {
-    if (!currfilepath) return false;
+  ipcMain.handle('create-snapshot', (event, data,currfile) => {
+    if (!currfile) return false;
 
-    const snapPath = snapshotFile + "_" + path.basename(currfilepath);
+    const snapPath = snapshotFile + "_" + path.basename(currfile);
 
     fs.writeFileSync(snapPath, data);
     return true;
   });
 
-  ipcMain.handle("restore-snapshot", () => {
-    if (!currfilepath) return null;
+  ipcMain.handle("restore-snapshot", (event,currfile) => {
+    if (!currfile) return null;
 
-    const snapPath = snapshotFile + "_" + path.basename(currfilepath);
+    const snapPath = snapshotFile + "_" + path.basename(currfile);
 
     if (fs.existsSync(snapPath)) {
       return fs.readFileSync(snapPath, "utf-8");
@@ -226,4 +170,19 @@ function createWindow() {
 }
 
 
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+    createWindow();
+
+    globalShortcut.register('CommandOrControl+Shift+K', () => {
+        const win = BrowserWindow.getAllWindows()[0];
+
+        if (win) {
+            if (win.isMinimized()) win.restore();
+            win.focus();
+        }
+    });
+});
+
+// app.on('will-quit', () => {
+//     globalShortcut.unregisterAll();
+// });
