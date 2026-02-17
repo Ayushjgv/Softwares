@@ -117,19 +117,14 @@ dropArea.addEventListener("dragleave", () => {
 dropArea.addEventListener("drop", (event) => {
     event.preventDefault();
     dropArea.style.borderColor = "#888";
-
-    const files = event.dataTransfer.files;
-
     let filePaths = [];
-
-    for (let i = 0; i < files.length; i++) {
-        filePaths.push(files[i].path);
+    for (const file of event.dataTransfer.files) {
+        filePaths.push(file.path);
     }
-    console.log(event);
-    console.log(event.dataTransfer.types.includes("Files"));
-    console.log("Dropped-Files", files);
-
-    ipcRenderer.send('dropped-files',filePaths);
+    console.log("Dropped:", filePaths);
+    if (filePaths.length > 0) {
+        ipcRenderer.send('dropped-files', filePaths,discoveredIP,discoveredPort);
+    }
 });
 
 
@@ -152,7 +147,13 @@ ipcRenderer.on('no-device-found',(e)=>{
 
 ipcRenderer.on('history', (event, file) => {
     const div = document.createElement('div');
-    div.innerText = `${file.name}`;
+    div.innerText = `${file.name} (${(file.size/1024).toFixed(2)} KB)`;
 
     document.querySelector('.left').appendChild(div);
 });
+
+
+
+
+
+

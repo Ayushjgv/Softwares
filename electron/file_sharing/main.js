@@ -17,6 +17,7 @@ const devicename= os.hostname();
 let win;
 let port;
 let ip;
+let received=0;
 let totalsize;
 
 //buffer pending devices
@@ -71,32 +72,45 @@ function connectclient(ip,port){
 //eastablish tcp server
 
 
-const server = new net.createServer((socket)=>{
-    console.log("hello from socket",socket.remoteAddress);
+const server = new net.createServer((socket) => {
 
-    let filestream=null;
+    let filestream = null;
+    let received = 0;
+    let totalsize = 0;
 
-    socket.on('data',(data)=>{
-        console.log(data.toString());
+    socket.on('data', (data) => {
 
+        if (!filestream) {
+            const meta = JSON.parse(data.toString());
 
-        if(!filestream){
-            filestream = fs.createWriteStream("received_"+data.toString());
+            totalsize = meta.size;
+
+            filestream = fs.createWriteStream("received_" + meta.name);
+
             socket.write("ready");
+
             win.webContents.send('history', {
-                name: data.toString()
+                name: meta.name,
+                size:meta.size
             });
-        }else{
-            // progress = (sent/totalsize)*100;
-            // win.webContents.send('progress',progress);
+
+        } else {
+
+            received += data.length;
+
+            const progress = (received / totalsize) * 100;
+
+            win.webContents.send('progress', progress);
+
             filestream.write(data);
         }
     });
-    socket.on('end',()=>{
-        console.log("connection lost");
-        filestream.end();
-    })
-})
+
+    socket.on('end', () => {
+        if (filestream) filestream.end();
+    });
+});
+
 
 server.listen(PORT,'0.0.0.0');
 
@@ -107,25 +121,29 @@ server.listen(PORT,'0.0.0.0');
 function sendfile(ip,port,filepath,totalsize){
     const client = new net.Socket();
 
-    client.connect(port,ip,()=>{
-        // console.log("sending files");
-        
+    client.connect(port, ip, () => {
         const filename = path.basename(filepath);
 
-        client.write(filename);
+        const metadata = JSON.stringify({
+            name: filename,
+            size: totalsize
+        });
+
+        client.write(metadata);
     });
+
 
     client.on('data',(data)=>{
         if(data.toString()==="ready"){
             const readStream = fs.createReadStream(filepath,{
                 highWaterMark:1024*1024
             });
-            let sent = 0;
-            let progress=0;
+            // let sent = 0;
+            // let progress=0;
             readStream.on('data',(chunk)=>{
-                sent+=chunk.length;
-                progress = (sent/totalsize)*100;
-                win.webContents.send('progress',progress);
+                // sent+=chunk.length;
+                // progress = (sent/totalsize)*100;
+                // win.webContents.send('progress',progress);
                 // console.log(sent);
                 client.write(chunk);
             });
@@ -171,7 +189,8 @@ ipcMain.on('send-file',async (event,ip,port)=>{
             const filename = path.basename(filePath);
             console.log(filename);
             win.webContents.send('history', {
-                name: filename
+                name: filename,
+                size:totalsize
             });
 
             sendfile(ip, port, filePath,totalsize);
@@ -182,14 +201,16 @@ ipcMain.on('send-file',async (event,ip,port)=>{
 });
 
 
-ipcMain.on('dropped-files',(event,filepaths)=>{
-    filepaths.forEach((filePath)=>{
-        stats = fs.statSync(filePath);
-        totalsize=stats.size;
-        // console.log(filePath)
-        sendfile(ip, port, filePath,totalsize);
+ipcMain.on('dropped-files', (event, filepaths,ip,port) => {
+    console.log("Received in main:", filepaths);
+
+    filepaths.forEach((filePath) => {
+        const stats = fs.statSync(filePath);
+        const totalsize = stats.size;
+
+        sendfile(ip, port, filePath, totalsize);
     });
-})
+});
 
 
 ipcMain.on('reload-please',(event)=>{
