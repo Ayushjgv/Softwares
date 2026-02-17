@@ -1,0 +1,150 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+body {
+    background: #0f172a;
+    color: #f1f5f9;
+    height: 100vh;
+}
+
+
+
+.container {
+    display: flex;
+    height: 100vh;
+}
+
+
+
+.left {
+    width: 260px;
+    background: #111827;
+    padding: 25px;
+    border-right: 1px solid #1f2937;
+}
+
+.left h3 {
+    font-size: 18px;
+    font-weight: 500;
+    color: #7e8591;
+}
+
+
+
+.right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 30px;
+    gap: 30px;
+}
+
+
+
+.devicelist {
+    background: #1e293b;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.devicelist h4 {
+    margin-bottom: 15px;
+    color: #f1f5f9;
+    font-weight: 500;
+}
+
+#deviceList {
+    list-style: none;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+#deviceList li {
+    padding: 8px 10px;
+    border-radius: 6px;
+    margin-bottom: 6px;
+    background: #1f2937;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+#deviceList li:hover {
+    background: #2563eb;
+}
+
+/* ===== Buttons ===== */
+
+button {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 8px;
+    background: #14b8a6;
+    color: #f1f5f9;
+    font-size: 14px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+button:hover {
+    background: #0d9488;
+    transform: translateY(-1px);
+}
+
+
+
+.right-bottom {
+    background: #1e293b;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+
+#drop-area {
+    width: 100%;
+    max-width: 450px;
+    height: 220px;
+    border: 2px dashed #334155;
+    border-radius: 12px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+
+    color: #f1f5f9;
+    transition: 0.3s;
+}
+
+#drop-area:hover {
+    border-color: #2563eb;
+    background: rgba(37, 99, 235, 0.05);
+}
+
+/* ===== Progress Bar ===== */
+
+progress {
+    width: 100%;
+    max-width: 450px;
+    height: 16px;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+progress::-webkit-progress-bar {
+    background: #1f2937;
+}
+
+progress::-webkit-progress-value {
+    background: #10b981;
+}

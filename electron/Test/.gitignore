@@ -1,0 +1,39 @@
+# Node modules
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# Electron build folders
+dist/
+build/
+out/
+
+# Environment files
+.env
+.env.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+
+# Logs
+logs/
+*.log
+
+# Cache
+.cache/
+.tmp/
+
+# Compiled files
+*.o
+*.out
+
+# Package locks (optional)
+# package-lock.json
+
+# Electron Forge / Builder
+.release/

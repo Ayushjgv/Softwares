@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File_Transfer</title>
+    <link rel="stylesheet" href="stylesheeet.css">
+</head>
+<body>
+    <div class="topbar">YOUR IP : PORT: <h3 id="port"></h3> </div>
+    <div class="container">
+        <div class="left" id="left">
+            <h3>History</h3>
+        </div>
+        <div class="right">
+            <div class="devicelist">
+                <button id="reload">Reload</button>
+                <h4>Devices List</h4>
+            </div>
+            <ul id="deviceList"></ul>
+            <div class="right-bottom">
+                <button id="send">Send File</button>
+                <progress id="progress" max="100" value="0"></progress>
+                <div id="drop-area">
+                    <h3>Drag And Drop Files Here</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="renderer.js"></script>
+</body>
+</html>

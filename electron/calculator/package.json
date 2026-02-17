@@ -1,0 +1,38 @@
+{
+  "name": "calculator",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "watch": "nodemon --exec electron .",
+    "start": "electron .",
+    "electron" : "electron .",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "dist": "electron-builder"
+  },
+  "dependencies": {
+    "electron-window-state": "^5.0.3",
+    "fs": "^0.0.1-security",
+    "nodemon": "^3.1.11",
+    "path": "^0.12.7",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "electron": "^40.1.0",
+    "electron-builder": "^26.7.0",
+    "@eslint/js": "^9.39.1",
+    "@types/react": "^19.2.5",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.1",
+    "eslint": "^9.39.1",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.4.24",
+    "globals": "^16.5.0",
+    "vite": "^7.2.4"
+  }
+}
