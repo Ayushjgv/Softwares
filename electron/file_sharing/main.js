@@ -71,39 +71,36 @@ function connectclient(ip,port){
 
 //eastablish tcp server
 
-
-const server = new net.createServer((socket) => {
+const server = net.createServer((socket) => {
 
     let filestream = null;
-    let received = 0;
     let totalsize = 0;
+    let received = 0;
+    let metadataBuffer = "";
 
-    socket.on('data', (data) => {
+    socket.once('data', (data) => {
+        metadataBuffer += data.toString();
 
-        if (!filestream) {
-            const meta = JSON.parse(data.toString());
+        const meta = JSON.parse(metadataBuffer);
 
-            totalsize = meta.size;
+        totalsize = meta.size;
 
-            filestream = fs.createWriteStream("received_" + meta.name);
+        filestream = fs.createWriteStream("received_" + meta.name);
 
-            socket.write("ready");
+        win.webContents.send('history', {
+            name: meta.name,
+            size: meta.size
+        });
 
-            win.webContents.send('history', {
-                name: meta.name,
-                size:meta.size
-            });
+        socket.write("ready");
+        socket.pipe(filestream);
 
-        } else {
-
-            received += data.length;
-
+        socket.on('data', (chunk) => {
+            received += chunk.length;
             const progress = (received / totalsize) * 100;
 
             win.webContents.send('progress', progress);
-
-            filestream.write(data);
-        }
+        });
     });
 
     socket.on('end', () => {
@@ -120,6 +117,7 @@ server.listen(PORT,'0.0.0.0');
 
 function sendfile(ip,port,filepath,totalsize){
     const client = new net.Socket();
+    client.setNoDelay(true);
 
     client.connect(port, ip, () => {
         const filename = path.basename(filepath);
@@ -136,17 +134,9 @@ function sendfile(ip,port,filepath,totalsize){
     client.on('data',(data)=>{
         if(data.toString()==="ready"){
             const readStream = fs.createReadStream(filepath,{
-                highWaterMark:1024*1024
+                highWaterMark:1024*1024*8
             });
-            // let sent = 0;
-            // let progress=0;
-            readStream.on('data',(chunk)=>{
-                // sent+=chunk.length;
-                // progress = (sent/totalsize)*100;
-                // win.webContents.send('progress',progress);
-                // console.log(sent);
-                client.write(chunk);
-            });
+            readStream.pipe(client);
             readStream.on('end',()=>{
                 client.end();
             })
