@@ -11,141 +11,168 @@ const createSnapshot = document.getElementById('createsnapshot');
 const getSnapshot = document.getElementById('getsnapshot');
 const add = document.getElementById('add');
 
+// Global tracker for unique temporary IDs for untitled files
+let untitledCount = 0;
 
-let currfile;
+let currfile = ""; 
 let autoSaveTimer = null;
-let file;
-
-
-
 let FilePaths = [];
+let wordWrap = false; // Set to false initially to match standard editor default behavior
 
-//wrap on off
-
+// Toggle word wrap
 wrap.addEventListener('click', () => {
+    wordWrap = !wordWrap;
     editor.wrap = editor.wrap === "off" ? "soft" : "off";
+    updateLineNumbers(); 
 });
 
-//open save files
-
+// Open file handling
 open.addEventListener('click', async () => {
     const res = await window.api.openFile();
-
-    // console.log("File content:", res);
-
-    if (res) {
+    if (res && res.path) {
         editor.value = res.content;
         currfile = res.path;
-        if(!FilePaths.some(file=>file.path===res.path)) FilePaths.push(res);
+        
+        if (!FilePaths.some(file => file.path === res.path)) {
+            FilePaths.push(res);
+        }
         updatesidebar();
+        updateLineNumbers();
     }
 });
 
+// Unified save function logic
+async function handleSave() {
+    const data = editor.value;
 
-save.addEventListener('click', async () => {
-    if(currfile!=''){
-        const data = editor.value;
-        file = FilePaths.find(f => f.path === currfile);
-
-        if (file) {
-            file.content = data;
-        }
+    // If it's a real file on disk
+    if (currfile && !currfile.startsWith("untitled-")) {
+        const file = FilePaths.find(f => f.path === currfile);
+        if (file) file.content = data;
 
         await window.api.saveFile(data, currfile);
-    }
-    else{
-        const data=editor.value;
-        file = FilePaths.find(f => f.path === currfile);
-        if (file) {
-            file.content = data;
+    } else {
+        // If it's an untitled scratchpad file
+        const path = await window.api.saveFile(data, "");
+        if (path) {
+            // Find the temporary virtual file entry and update it to a real file path
+            const file = FilePaths.find(f => f.path === currfile);
+            if (file) {
+                file.path = path;
+                file.content = data;
+            }
+            currfile = path;
+            updatesidebar();
         }
-        const path=await window.api.saveFile(data, currfile);
-        file.path=path;
-        currfile=path;
-        updatesidebar();
     }
-});
+}
 
-//updatesidebar
+save.addEventListener('click', handleSave);
 
-function updatesidebar(){
-    filescontainer.innerHTML='';
-    FilePaths.forEach((f, index) => {
+// Redraw the open files sidebar
+async function updatesidebar() {
+    filescontainer.innerHTML = '';
+    
+    // Only notify backend IPC channels if it's a genuine absolute disk file path
+    if (currfile && !currfile.startsWith("untitled-")) {
+        await window.api.openedFile(currfile);
+    }
+
+    FilePaths.forEach((f) => {
         const div = document.createElement("div");
         div.classList.add("file-item");
 
-        let name = f.path.substring(f.path.lastIndexOf("/") + 1);
+        // Clean display layout: Real filenames get chopped, untitled files get clean "Untitled-X" text
+        let displayPath = "Untitled";
+        if (f.path) {
+            if (f.path.startsWith("untitled-")) {
+                const id = f.path.split("-")[1];
+                displayPath = `Untitled-${id}`;
+            } else {
+                displayPath = f.path.substring(f.path.lastIndexOf("/") + 1);
+            }
+        }
 
-        div.dataset.index = index;
-        div.textContent = name;
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = displayPath;
+        div.appendChild(nameSpan);
 
-        filescontainer.appendChild(div);
+        const crossBtn = document.createElement("div");
+        crossBtn.textContent = "X";
+        crossBtn.classList.add("cross-btn");
+        div.appendChild(crossBtn);
 
+        // Active highlighted tab injection hook
+        if (f.path === currfile) {
+            div.style.backgroundColor = "cyan";
+        }
 
-        div.addEventListener('click', async () => {
-            currfile=f.path;
-            editor.value=f.content;
+        div.addEventListener('click', () => {
+            currfile = f.path;
+            editor.value = f.content;
+            updatesidebar();
+            updateLineNumbers();
         });
 
+        crossBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); 
+            
+            FilePaths = FilePaths.filter(file => file.path !== f.path);
+
+            if (currfile === f.path) {
+                if (FilePaths.length > 0) {
+                    currfile = FilePaths[0].path;
+                    editor.value = FilePaths[0].content;
+                } else {
+                    currfile = "";
+                    editor.value = "";
+                }
+            }
+            updatesidebar();
+            updateLineNumbers();
+        });
+
+        filescontainer.appendChild(div);
     });
 }
 
-
-//snapshot
-
-
+// Snapshot system
 createSnapshot.addEventListener('click', async () => {
+    if (!currfile || currfile.startsWith("untitled-")) return;
     const data = editor.value;
-    await window.api.CreateSnapshot(data,currfile);
+    await window.api.CreateSnapshot(data, currfile);
 });
 
 getSnapshot.addEventListener('click', async () => {
+    if (!currfile || currfile.startsWith("untitled-")) return;
     const snapshot = await window.api.RestoreSnapshot(currfile);
 
-    if (snapshot) {
+    if (snapshot !== undefined && snapshot !== null) {
         editor.value = snapshot;
         updateLineNumbers();
-        // alert("Snapshot Restored!");
         editor.focus();
-    } else {
-        // alert("No snapshot available for this file.");
     }
 });
 
-
-
-
-//line numbers
-
-
-
+// Dynamic line numbering
 function updateLineNumbers() {
-    let numbers = "";
-
-    if (editor.wrap === "off") {
-        // Normal mode (no wrap)
+    if (wordWrap) {
+        let numbers = "";
         const lineCount = editor.value.split("\n").length;
-
         for (let i = 1; i <= lineCount; i++) {
             numbers += i + ".\n";
         }
+        lines.textContent = numbers;
+    } else {
+        lines.textContent = ""; 
     }
-    else {
-        // WRAP ON — calculate visual lines
-
-    }
-
-    lines.textContent = numbers;
 }
 
-//autosave
-
+// Memory-only autosave fallback 
 function autosave() {
-    if (autoSaveTimer) {
-        clearTimeout(autoSaveTimer);
-    }
+    if (autoSaveTimer) clearTimeout(autoSaveTimer);
 
-    autoSaveTimer = setTimeout(async () => {
+    autoSaveTimer = setTimeout(() => {
         const data = editor.value;
         const file = FilePaths.find(f => f.path === currfile);
         if (file) {
@@ -154,77 +181,59 @@ function autosave() {
     }, 1000);
 }
 
-
+// Scroll synchronization
 editor.addEventListener("scroll", () => {
     lines.scrollTop = editor.scrollTop;
 });
-
 
 editor.addEventListener("input", () => {
     updateLineNumbers();
     autosave();
 });
 
-updateLineNumbers();
-
-
-
-//sidebar
-
-sidebarbtn.addEventListener('click', () => {
-    sidebar.classList.add("active");
-});
-
-document.getElementById("close").addEventListener('click', () => {
-    sidebar.classList.remove("active");
-});
-
-
-//pinning
-
+// Window/UI pinning toggles
 pin.addEventListener('click', async () => {
-    let ispinned = await window.api.pin();
-    if (ispinned) pin.style.background = "cyan";
-    else pin.style.background = "white";
+    const ispinned = await window.api.pin();
+    pin.style.background = ispinned ? "cyan" : "white";
 });
 
-
-
-//shortcut controls
-
+// Electron main shortcuts
 window.electron.onFileOpened((files) => {
-    editor.value = files.content;
-    currfile = files.path;
-    if(!FilePaths.some(file=>file.path===files.path)) FilePaths.push(files);
-    updatesidebar();
-});
-
-
-window.electron.onSave(async () => {
-    const data = editor.value;
-    const file = FilePaths.find(f => f.path === currfile);
-
-    if (file) {
-        file.content = data;
+    if (files) {
+        editor.value = files.content;
+        currfile = files.path;
+        if (!FilePaths.some(file => file.path === files.path)) {
+            FilePaths.push(files);
+        }
+        updatesidebar();
+        updateLineNumbers();
     }
-
-    await window.api.saveFile(data, currfile);
 });
 
+window.electron.onSave(handleSave);
 
-//add button functionality
-
-
-
-
-add.addEventListener('click', () => {
-    const newFile = {
-        path: "",
-        content: ""
-    };
+// Helper function to create an untitled workspace tab cleanly
+function createUntitledFile() {
+    untitledCount++;
+    const virtualPath = `untitled-${untitledCount}`;
+    const newFile = { path: virtualPath, content: "" };
+    
     FilePaths.push(newFile);
-    currfile = newFile.path;
+    currfile = virtualPath;
     editor.value = '';
     updatesidebar();
+    updateLineNumbers();
+}
+
+// Add button functionality
+add.addEventListener('click', () => {
+    createUntitledFile();
 });
 
+// --- Initialization Logic ---
+// Automatically spins up your initial open Untitled File tab right when the application launches
+createUntitledFile();
+
+// Sidebar opening panels
+sidebarbtn.addEventListener('click', () => sidebar.classList.add("active"));
+document.getElementById("close").addEventListener('click', () => sidebar.classList.remove("active"));

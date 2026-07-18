@@ -1,165 +1,290 @@
-*{
+/* Core Variables & System Fonts */
+* {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
-.body {
-    display: flex;
-    height: 90vh;
-    border: 1px solid #ccc;
-    font-family: monospace;
+
+:root {
+    --bg-base: #f4f5f9;
+    --glass-bg: rgba(255, 255, 255, 0.45); /* Adjusted opacity for higher translucent contrast */
+    --glass-border: rgba(0, 0, 0, 0.08);
+    --text-primary: #1e2030;
+    --text-secondary: #6c7086;
+    
+    /* Elegant Clean Accents */
+    --accent-blue: #3b66f5;
+    --accent-teal: #14b8a6;
+    --accent-danger: #df2050;
+    
+    /* Font stacks */
+    --font-ui: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --font-code: 'Fira Code', Consolas, Monaco, monospace;
 }
 
-textarea{
-    width: 100vw;
-    height: 92vh;
-    backdrop-filter: blur(25px);
-    border:none;
-    outline: none;
-    font-size: 16px;
-    padding: 20px;
-    box-sizing: border-box;
-    /* background: red; */
-    color: #000;
-    resize: none;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-.lines {
-    padding: 10px;
-    /* background: #1e1e1e; */
-    color: #888;
-    text-align: right;
-    line-height: 1.5;
-    font-size: 14px;
-    user-select: none;
-    max-width: 40px;
-    min-width: none;
+body {
+    background-color: var(--bg-base);
+    color: var(--text-primary);
+    font-family: var(--font-ui);
     overflow: hidden;
-    height: 92vh;
+    height: 100vh;
 }
 
-.header{
+/* Base Window Containers */
+.container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
     width: 100vw;
+}
+
+/* Top Navigation Header */
+.header {
+    height: 52px;
+    background: rgba(244, 245, 249, 0.6);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--glass-border);
     display: flex;
     align-items: center;
+    padding: 0 16px;
+    gap: 8px;
     position: relative;
-    gap: 2px;
-    padding-top: 12px;
-    padding-left: 5px;
-    /* margin: 10px; */
-    box-sizing: border-box;
-    background: rgba(255, 255, 255, 0.2);
-    border-bottom: 1px solid rgb(0, 0, 0);
-}
-.container{
-    margin:0;
-    padding:0;
-    /* background: rgb(0, 0, 0); */
-    overflow: hidden;
+    z-index: 10;
 }
 
-
-button{
-    backdrop-filter: blur(25px);
-    -webkit-backdrop-filter: blur(25px);
-    background: rgba(83, 76, 76, 0);
-    border: 1px solid blue;
-    outline: none;
-    padding: 5px 10px;
-    font-size: 16px;
+/* Sleek Light Cyber-Glass Buttons */
+button {
+    background: rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    color: var(--text-primary);
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: 6px;
     cursor: pointer;
-    color: #000;
-    border-radius: 5px;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    margin-top: 5px;
-    margin-bottom: 5px;
-    transition: 0.5s ease;
+    font-family: var(--font-ui);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
-button:hover{
-    background-color: aqua;
+button:hover {
+    background: rgba(59, 102, 245, 0.08);
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 10px rgba(59, 102, 245, 0.15);
 }
 
+/* JavaScript Dynamic Selection Updates */
+button[style*="background: cyan"],
+button[style*="background-color: cyan"] {
+    background: rgba(20, 184, 166, 0.12) !important;
+    border-color: var(--accent-teal) !important;
+    color: var(--accent-teal) !important;
+    box-shadow: 0 0 12px rgba(20, 184, 166, 0.2) !important;
+}
 
-#editor {
+/* Floating Sidebar Button Placement */
+#sidebarbtn {
+    position: absolute;
+    right: 16px;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(59, 102, 245, 0.08);
+    /* backdrop-filter: blur(10px); */
+    border-color: rgba(59, 102, 245, 0.15);
+}
+
+#sidebarbtn:hover {
+    background: rgba(59, 102, 245, 0.15);
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 10px rgba(59, 102, 245, 0.2);
+}
+
+#sidebarbtn::before {
+    content: "☰";
+    font-size: 16px;
+    color: var(--text-primary);
+}
+
+/* Workspace Windows Split */
+.body {
+    display: flex;
     flex: 1;
-    padding: 10px;
+    height: calc(100vh - 52px);
+    position: relative;
+    background: #ffffff;
+}
+
+/* Left Gutter / Lines Panel */
+.lines {
+    width: 55px;
+    padding: 20px 12px 20px 0;
+    font-family: var(--font-code);
+    font-size: 14px;
+    line-height: 1.6;
+    text-align: right;
+    color: var(--text-secondary);
+    background: #fafafa;
+    user-select: none;
+    overflow: hidden;
+    border-right: 1px solid var(--glass-border);
+}
+
+/* Code Space Editor Textarea */
+textarea, #editor {
+    flex: 1;
+    height: 100%;
+    background: transparent;
     border: none;
     outline: none;
-    resize: none;
-    font-family: monospace;
+    color: var(--text-primary);
+    font-family: var(--font-code);
     font-size: 14px;
-    line-height: 1.5;
-    overflow: auto;
+    line-height: 1.6;
+    padding: 20px 24px 20px 16px;
+    resize: none;
 }
 
-
-#sidebarbtn{
-    background-color: red;
-    position: absolute;
-    right: 10px;
-}
-
+/* Premium Slide-out Translucent Control Panel */
 #sidebar {
-    position: fixed; 
+    position: fixed;
     top: 0;
-    right: -250px;     
-    width: 250px;
+    right: -280px;
+    width: 280px;
     height: 100vh;
-
-    /* background-color: white; */
-    backdrop-filter: blur(10px);
-    border: 1px solid black;
-    padding: 20px;
-
-    transition: right 0.4s ease;
+    /* background: var(--glass-bg); */
+    backdrop-filter: blur(3px); /* Deep high-end glass blur */
+    -webkit-backdrop-filter: blur(30px);
+    border-left: 1px solid var(--glass-border);
+    padding: 24px;
+    transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     z-index: 999;
-
     display: flex;
-    flex-wrap: wrap;
     flex-direction: column;
-    gap: 10px;
+    gap: 20px;
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.03);
 }
 
 #sidebar.active {
     right: 0;
 }
 
-
-#close{
-    background-color: rgba(255, 0, 0, 0.1);
-    backdrop-filter: blur(10px);
-    width: fit-content;
-    height: fit-content;
-}
-#add{
-    /* background: rgba(0, 0, 255, 0.1); */
-    backdrop-filter: blur(10px);
-    width: fit-content;
-    height: fit-content;
+/* Header layout configuration inside the sidebar */
+#sidebar > div:first-child {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
+/* Blurs added to individual sidebar actions */
+#close {
+    background: rgba(223, 32, 80, 0.06);
+    border-color: rgba(223, 32, 80, 0.15);
+    color: var(--accent-danger);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
 
-/* files .container */
+#close:hover {
+    background: var(--accent-danger);
+    color: #fff;
+    box-shadow: 0 0 10px rgba(223, 32, 80, 0.3);
+}
 
+#add {
+    background: rgba(59, 102, 245, 0.06);
+    border-color: rgba(59, 102, 245, 0.15);
+    color: var(--accent-blue);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+#add:hover {
+    background: var(--accent-blue);
+    color: #fff;
+}
+
+/* Opened Tab List Arrays */
 #filescontainer {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
+    overflow-y: auto;
+    flex: 1;
 }
 
+/* Glass Tabs with explicit backdrop filter layers */
 .file-item {
-    padding: 8px;
-    border: 1px solid #aaa;
-    border-radius: 5px;
+    padding: 12px 14px;
+    /* background: rgba(255, 255, 255, 0.3); */
+    backdrop-filter: blur(3px);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
     cursor: pointer;
-    background: rgba(0, 0, 0, 0);
-    backdrop-filter: blur(10px);
-    transition: 0.3s;
-    font-size: 14px;
-    word-break: break-all;
+    font-size: 13px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: all 0.2s ease;
 }
 
 .file-item:hover {
-    background: cyan;
+    background: rgba(255, 255, 255, 0.6);
+    border-color: rgba(0, 0, 0, 0.15);
+    color: var(--text-primary);
+}
+
+/* Active Highlight Hook overrides via JS inline background-color engines */
+.file-item[style*="background-color: cyan"] {
+    background: rgba(20, 184, 166, 0.1) !important;
+    border-color: var(--accent-teal) !important;
+    color: var(--accent-teal) !important;
+    font-weight: 600;
+    box-shadow: inset 0 0 8px rgba(20, 184, 166, 0.05);
+}
+
+.cross-btn {
+    color: var(--text-secondary);
+    font-family: inherit;
+    font-weight: bold;
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.file-item:hover .cross-btn {
+    color: var(--accent-danger);
+}
+
+.cross-btn:hover {
+    background: rgba(223, 32, 80, 0.1);
+    color: var(--accent-danger) !important;
+}
+
+/* Custom Scrollbar Enhancements */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.06);
+    border-radius: 20px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(59, 102, 245, 0.3);
 }

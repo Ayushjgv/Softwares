@@ -47,7 +47,8 @@ function createWindow() {
       (input.control && input.shift && input.key.toLowerCase() === 'i') ||
       input.key === 'F12'
     ) {
-      event.preventDefault();
+      // event.preventDefault();
+      win.webContents.toggleDevTools();
     }
 
   });
@@ -118,7 +119,11 @@ function createWindow() {
           content: Content
       };
   });
+  //handle title
 
+  ipcMain.handle('openedFile',async(event,currFilePath)=>{
+    win.setTitle("NotePad - " + currFilePath);
+  });
 
   ipcMain.handle("save-file-dialog", async (event, text,filepath) => {
     if(filepath!=''){

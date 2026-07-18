@@ -16,6 +16,9 @@ contextBridge.exposeInMainWorld("api",{
     },
     RestoreSnapshot:(currfile)=>{
         return ipcRenderer.invoke('restore-snapshot',currfile);
+    },
+    openedFile:(currFilePath)=>{
+        return ipcRenderer.invoke('openedFile',currFilePath);
     }
 });
 
