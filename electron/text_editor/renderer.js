@@ -3,6 +3,7 @@ const save = document.getElementById('save');
 const editor = document.getElementById('editor');
 const lines = document.getElementById('lines');
 const wrap = document.getElementById('wrap');
+const split = document.getElementById('split');
 const sidebarbtn = document.getElementById('sidebarbtn');
 const sidebar = document.getElementById('sidebar');
 const pin = document.getElementById('pin');
@@ -10,59 +11,232 @@ const filescontainer = document.getElementById('filescontainer');
 const createSnapshot = document.getElementById('createsnapshot');
 const getSnapshot = document.getElementById('getsnapshot');
 const add = document.getElementById('add');
+const body = document.getElementById('body');
 
-// Global tracker for unique temporary IDs for untitled files
 let untitledCount = 0;
-
-let currfile = ""; 
+let paneCount = 0;
+let currfile = "";
 let autoSaveTimer = null;
 let FilePaths = [];
-let wordWrap = false; // Set to false initially to match standard editor default behavior
+let panes = [];
+let activePane = null;
+let wordWrap = false;
 
-// Toggle word wrap
+function getDisplayName(path) {
+    if (!path) return "Untitled";
+    if (path.startsWith("untitled-")) return `Untitled-${path.split("-")[1]}`;
+    return path.substring(path.lastIndexOf("/") + 1);
+}
+
+function getFile(path) {
+    return FilePaths.find(file => file.path === path);
+}
+
+function persistPaneContent(pane) {
+    if (!pane || !pane.path) return;
+    const file = getFile(pane.path);
+    if (file) file.content = pane.editor.value;
+}
+
+function getContentForPath(path) {
+    const file = getFile(path);
+    return file ? file.content : "";
+}
+
+function setActivePane(pane) {
+    if (!pane) return;
+    if (activePane) {
+        persistPaneContent(activePane);
+        activePane.container.classList.remove("active-pane");
+    }
+
+    activePane = pane;
+    currfile = pane.path || "";
+    pane.container.classList.add("active-pane");
+    updateLineNumbers(pane);
+    updatesidebar();
+}
+
+function updatePaneTitle(pane) {
+    pane.name.textContent = getDisplayName(pane.path);
+    pane.container.title = pane.path && !pane.path.startsWith("untitled-") ? pane.path : getDisplayName(pane.path);
+}
+
+function setPaneFile(pane, path, content = getContentForPath(path)) {
+    if (!pane) return;
+    persistPaneContent(pane);
+    pane.path = path;
+    pane.editor.value = content || "";
+    pane.editor.wrap = wordWrap ? "soft" : "off";
+    updatePaneTitle(pane);
+    updateLineNumbers(pane);
+    setActivePane(pane);
+}
+
+function addFileEntry(file) {
+    if (!file || !file.path) return;
+    const existing = getFile(file.path);
+    if (existing) {
+        existing.content = file.content;
+    } else {
+        FilePaths.push(file);
+    }
+}
+
+function createPane(path = currfile) {
+    const paneId = paneCount++;
+    let container;
+    let paneEditor;
+    let paneLines;
+    let paneName;
+    let closePaneBtn = null;
+
+    if (paneId === 0) {
+        container = document.querySelector(".editor-pane");
+        paneEditor = editor;
+        paneLines = lines;
+        paneName = container.querySelector(".pane-name");
+    } else {
+        container = document.createElement("div");
+        container.className = "editor-pane";
+        container.dataset.paneId = String(paneId);
+        container.innerHTML = `
+            <div class="pane-title">
+                <span class="pane-name">Untitled</span>
+                <button class="pane-close icon-btn" title="Close split" aria-label="Close split">
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg>
+                </button>
+            </div>
+            <div class="editor-shell">
+                <div class="lines"></div>
+                <textarea></textarea>
+            </div>
+        `;
+        paneEditor = container.querySelector("textarea");
+        paneLines = container.querySelector(".lines");
+        paneName = container.querySelector(".pane-name");
+        closePaneBtn = container.querySelector(".pane-close");
+        body.appendChild(container);
+    }
+
+    const pane = {
+        id: paneId,
+        container,
+        editor: paneEditor,
+        lines: paneLines,
+        name: paneName,
+        path: path || ""
+    };
+
+    panes.push(pane);
+    paneEditor.wrap = wordWrap ? "soft" : "off";
+    paneEditor.value = getContentForPath(pane.path);
+    updatePaneTitle(pane);
+    updateLineNumbers(pane);
+
+    paneEditor.addEventListener("focus", () => setActivePane(pane));
+    paneEditor.addEventListener("scroll", () => {
+        pane.lines.scrollTop = pane.editor.scrollTop;
+    });
+    paneEditor.addEventListener("input", () => {
+        setActivePane(pane);
+        updateLineNumbers(pane);
+        autosave();
+    });
+    container.addEventListener("mousedown", () => setActivePane(pane));
+
+    if (closePaneBtn) {
+        closePaneBtn.addEventListener("click", (event) => {
+            event.stopPropagation();
+            closePane(pane);
+        });
+    }
+
+    setActivePane(pane);
+    return pane;
+}
+
+function closePane(pane) {
+    if (!pane || panes.length <= 1) return;
+    persistPaneContent(pane);
+    panes = panes.filter(item => item !== pane);
+    pane.container.remove();
+
+    if (activePane === pane) {
+        setActivePane(panes[0]);
+    } else {
+        updatesidebar();
+    }
+
+    split.classList.toggle("is-active", panes.length > 1);
+}
+
+function updateAllPaneTitles() {
+    panes.forEach(updatePaneTitle);
+}
+
+function syncPanesForFile(path) {
+    const file = getFile(path);
+    if (!file) return;
+    panes.forEach((pane) => {
+        if (pane !== activePane && pane.path === path) {
+            pane.editor.value = file.content;
+            updateLineNumbers(pane);
+        }
+    });
+}
+
 wrap.addEventListener('click', () => {
     wordWrap = !wordWrap;
-    editor.wrap = editor.wrap === "off" ? "soft" : "off";
     wrap.classList.toggle("is-active", wordWrap);
-    updateLineNumbers(); 
+    panes.forEach((pane) => {
+        pane.editor.wrap = wordWrap ? "soft" : "off";
+        updateLineNumbers(pane);
+    });
 });
 
-// Open file handling
+split.addEventListener('click', () => {
+    persistPaneContent(activePane);
+    const nextFile = FilePaths.find(file => !panes.some(pane => pane.path === file.path));
+    createPane(nextFile ? nextFile.path : currfile);
+    split.classList.toggle("is-active", panes.length > 1);
+});
+
 open.addEventListener('click', async () => {
     const res = await window.api.openFile();
     if (res && res.path) {
-        editor.value = res.content;
-        currfile = res.path;
-        
-        if (!FilePaths.some(file => file.path === res.path)) {
-            FilePaths.push(res);
-        }
-        updatesidebar();
-        updateLineNumbers();
+        addFileEntry(res);
+        setPaneFile(activePane, res.path, res.content);
     }
 });
 
-// Unified save function logic
 async function handleSave() {
-    const data = editor.value;
+    persistPaneContent(activePane);
+    const data = activePane ? activePane.editor.value : "";
+    const oldPath = currfile;
 
-    // If it's a real file on disk
     if (currfile && !currfile.startsWith("untitled-")) {
-        const file = FilePaths.find(f => f.path === currfile);
+        const file = getFile(currfile);
         if (file) file.content = data;
-
         await window.api.saveFile(data, currfile);
+        syncPanesForFile(currfile);
     } else {
-        // If it's an untitled scratchpad file
         const path = await window.api.saveFile(data, "");
-        if (path) {
-            // Find the temporary virtual file entry and update it to a real file path
-            const file = FilePaths.find(f => f.path === currfile);
+        if (path && activePane) {
+            const file = getFile(oldPath);
             if (file) {
                 file.path = path;
                 file.content = data;
             }
+
+            panes.forEach((pane) => {
+                if (pane.path === oldPath) {
+                    pane.path = path;
+                    updatePaneTitle(pane);
+                }
+            });
             currfile = path;
+            updateAllPaneTitles();
             updatesidebar();
         }
     }
@@ -70,11 +244,9 @@ async function handleSave() {
 
 save.addEventListener('click', handleSave);
 
-// Redraw the open files sidebar
 async function updatesidebar() {
     filescontainer.innerHTML = '';
-    
-    // Only notify backend IPC channels if it's a genuine absolute disk file path
+
     if (currfile && !currfile.startsWith("untitled-")) {
         await window.api.openedFile(currfile);
     }
@@ -83,19 +255,8 @@ async function updatesidebar() {
         const div = document.createElement("div");
         div.classList.add("file-item");
 
-        // Clean display layout: Real filenames get chopped, untitled files get clean "Untitled-X" text
-        let displayPath = "Untitled";
-        if (f.path) {
-            if (f.path.startsWith("untitled-")) {
-                const id = f.path.split("-")[1];
-                displayPath = `Untitled-${id}`;
-            } else {
-                displayPath = f.path.substring(f.path.lastIndexOf("/") + 1);
-            }
-        }
-
         const nameSpan = document.createElement("span");
-        nameSpan.textContent = displayPath;
+        nameSpan.textContent = getDisplayName(f.path);
         div.appendChild(nameSpan);
 
         const crossBtn = document.createElement("div");
@@ -105,45 +266,44 @@ async function updatesidebar() {
         crossBtn.classList.add("cross-btn");
         div.appendChild(crossBtn);
 
-        // Active highlighted tab injection hook
         if (f.path === currfile) {
             div.style.backgroundColor = "cyan";
         }
 
         div.addEventListener('click', () => {
-            currfile = f.path;
-            editor.value = f.content;
-            updatesidebar();
-            updateLineNumbers();
+            setPaneFile(activePane, f.path, f.content);
         });
 
         crossBtn.addEventListener('click', (e) => {
-            e.stopPropagation(); 
-            
+            e.stopPropagation();
             FilePaths = FilePaths.filter(file => file.path !== f.path);
 
-            if (currfile === f.path) {
-                if (FilePaths.length > 0) {
-                    currfile = FilePaths[0].path;
-                    editor.value = FilePaths[0].content;
-                } else {
-                    currfile = "";
-                    editor.value = "";
+            panes.forEach((pane) => {
+                if (pane.path === f.path) {
+                    const fallback = FilePaths[0];
+                    pane.path = fallback ? fallback.path : "";
+                    pane.editor.value = fallback ? fallback.content : "";
+                    updatePaneTitle(pane);
+                    updateLineNumbers(pane);
                 }
+            });
+
+            if (currfile === f.path) {
+                const fallback = activePane && activePane.path ? activePane : panes[0];
+                currfile = fallback ? fallback.path : "";
             }
+
             updatesidebar();
-            updateLineNumbers();
         });
 
         filescontainer.appendChild(div);
     });
 }
 
-// Snapshot system
 createSnapshot.addEventListener('click', async () => {
     if (!currfile || currfile.startsWith("untitled-")) return;
-    const data = editor.value;
-    await window.api.CreateSnapshot(data, currfile);
+    persistPaneContent(activePane);
+    await window.api.CreateSnapshot(activePane.editor.value, currfile);
 });
 
 getSnapshot.addEventListener('click', async () => {
@@ -151,92 +311,68 @@ getSnapshot.addEventListener('click', async () => {
     const snapshot = await window.api.RestoreSnapshot(currfile);
 
     if (snapshot !== undefined && snapshot !== null) {
-        editor.value = snapshot;
-        updateLineNumbers();
-        editor.focus();
+        const file = getFile(currfile);
+        if (file) file.content = snapshot;
+        activePane.editor.value = snapshot;
+        updateLineNumbers(activePane);
+        syncPanesForFile(currfile);
+        activePane.editor.focus();
     }
 });
 
-// Dynamic line numbering
-function updateLineNumbers() {
+function updateLineNumbers(pane = activePane) {
+    if (!pane) return;
+
     if (wordWrap) {
         let numbers = "";
-        const lineCount = editor.value.split("\n").length;
+        const lineCount = pane.editor.value.split("\n").length;
         for (let i = 1; i <= lineCount; i++) {
             numbers += i + ".\n";
         }
-        lines.textContent = numbers;
+        pane.lines.textContent = numbers;
     } else {
-        lines.textContent = ""; 
+        pane.lines.textContent = "";
     }
 }
 
-// Memory-only autosave fallback 
 function autosave() {
     if (autoSaveTimer) clearTimeout(autoSaveTimer);
 
     autoSaveTimer = setTimeout(() => {
-        const data = editor.value;
-        const file = FilePaths.find(f => f.path === currfile);
-        if (file) {
-            file.content = data;
-        }
+        persistPaneContent(activePane);
+        if (activePane) syncPanesForFile(activePane.path);
     }, 1000);
 }
 
-// Scroll synchronization
-editor.addEventListener("scroll", () => {
-    lines.scrollTop = editor.scrollTop;
-});
-
-editor.addEventListener("input", () => {
-    updateLineNumbers();
-    autosave();
-});
-
-// Window/UI pinning toggles
 pin.addEventListener('click', async () => {
     const ispinned = await window.api.pin();
     pin.classList.toggle("is-active", ispinned);
 });
 
-// Electron main shortcuts
 window.electron.onFileOpened((files) => {
     if (files) {
-        editor.value = files.content;
-        currfile = files.path;
-        if (!FilePaths.some(file => file.path === files.path)) {
-            FilePaths.push(files);
-        }
-        updatesidebar();
-        updateLineNumbers();
+        addFileEntry(files);
+        setPaneFile(activePane, files.path, files.content);
     }
 });
 
 window.electron.onSave(handleSave);
 
-// Helper function to create an untitled workspace tab cleanly
 function createUntitledFile() {
     untitledCount++;
     const virtualPath = `untitled-${untitledCount}`;
     const newFile = { path: virtualPath, content: "" };
-    
+
     FilePaths.push(newFile);
-    currfile = virtualPath;
-    editor.value = '';
-    updatesidebar();
-    updateLineNumbers();
+    setPaneFile(activePane, virtualPath, "");
 }
 
-// Add button functionality
 add.addEventListener('click', () => {
     createUntitledFile();
 });
 
-// --- Initialization Logic ---
-// Automatically spins up your initial open Untitled File tab right when the application launches
+createPane();
 createUntitledFile();
 
-// Sidebar opening panels
 sidebarbtn.addEventListener('click', () => sidebar.classList.add("active"));
 document.getElementById("close").addEventListener('click', () => sidebar.classList.remove("active"));

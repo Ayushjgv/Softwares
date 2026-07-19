@@ -176,7 +176,60 @@ button[style*="background-color: cyan"] {
     flex: 1;
     height: calc(100vh - 58px);
     position: relative;
+    background: #eef0f5;
+    gap: 1px;
+    overflow: hidden;
+}
+
+.editor-pane {
+    min-width: 260px;
+    flex: 1 1 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
     background: #ffffff;
+    border-right: 1px solid var(--glass-border);
+    overflow: hidden;
+}
+
+.editor-pane:last-child {
+    border-right: none;
+}
+
+.editor-pane.active-pane {
+    box-shadow: inset 0 2px 0 var(--accent-blue);
+}
+
+.pane-title {
+    min-height: 38px;
+    padding: 0 10px 0 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    background: #fafbfe;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.pane-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.active-pane .pane-name {
+    color: var(--accent-blue);
+}
+
+.editor-shell {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
 }
 
 /* Left Gutter / Lines Panel */
@@ -207,6 +260,23 @@ textarea, #editor {
     line-height: 1.6;
     padding: 20px 24px 20px 16px;
     resize: none;
+}
+
+.pane-close {
+    width: 28px;
+    height: 28px;
+    min-height: 28px;
+    padding: 0;
+    color: var(--text-secondary);
+    background: transparent;
+    box-shadow: none;
+}
+
+.pane-close:hover {
+    color: var(--accent-danger);
+    background: rgba(223, 32, 80, 0.08);
+    border-color: rgba(223, 32, 80, 0.18);
+    box-shadow: none;
 }
 
 /* Premium Slide-out Translucent Control Panel */

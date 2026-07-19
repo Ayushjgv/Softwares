@@ -24,6 +24,10 @@
             <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 4 5 5-4 1-4 7-2-2 7-4z"/><path d="m9 15-5 5"/></svg>
             <span>Pin</span>
         </button>
+        <button id="split" class="toolbar-btn" title="Split screen" aria-label="Split screen">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4z"/><path d="M12 5v14"/></svg>
+            <span>Split Screen</span>
+        </button>
         <button id="createsnapshot" class="toolbar-btn" title="Create snapshot" aria-label="Create snapshot">
             <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h3l2-2h6l2 2h3v12H4z"/><circle cx="12" cy="13" r="3"/></svg>
             <span>Snapshot</span>
@@ -60,8 +64,15 @@
     </div>
 
         <div class="body" id="body">
-            <div class="lines" id="lines"></div>
-            <textarea id="editor"></textarea>
+            <div class="editor-pane active-pane" data-pane-id="0">
+                <div class="pane-title">
+                    <span class="pane-name">Untitled</span>
+                </div>
+                <div class="editor-shell">
+                    <div class="lines" id="lines"></div>
+                    <textarea id="editor"></textarea>
+                </div>
+            </div>
         </div>
         
     </div>
