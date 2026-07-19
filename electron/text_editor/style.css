@@ -16,6 +16,9 @@
     --accent-blue: #3b66f5;
     --accent-teal: #14b8a6;
     --accent-danger: #df2050;
+    --button-bg: rgba(255, 255, 255, 0.72);
+    --button-border: rgba(30, 32, 48, 0.1);
+    --button-shadow: 0 8px 20px rgba(30, 32, 48, 0.08);
     
     /* Font stacks */
     --font-ui: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -40,39 +43,103 @@ body {
 
 /* Top Navigation Header */
 .header {
-    height: 52px;
-    background: rgba(244, 245, 249, 0.6);
+    min-height: 58px;
+    background: rgba(244, 245, 249, 0.82);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border-bottom: 1px solid var(--glass-border);
     display: flex;
     align-items: center;
-    padding: 0 16px;
+    padding: 10px 64px 10px 16px;
     gap: 8px;
     position: relative;
     z-index: 10;
+    overflow-x: auto;
 }
 
-/* Sleek Light Cyber-Glass Buttons */
+/* Polished App Buttons */
 button {
-    background: rgba(0, 0, 0, 0.03);
-    border: 1px solid rgba(0, 0, 0, 0.08);
+    min-height: 36px;
+    background: var(--button-bg);
+    border: 1px solid var(--button-border);
     color: var(--text-primary);
-    padding: 6px 14px;
+    padding: 8px 12px;
     font-size: 13px;
-    font-weight: 500;
-    border-radius: 6px;
+    font-weight: 600;
+    border-radius: 8px;
     cursor: pointer;
     font-family: var(--font-ui);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 0 1px 2px rgba(30, 32, 48, 0.05);
+    transition: transform 0.16s ease, background 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease, color 0.16s ease;
 }
 
 button:hover {
-    background: rgba(59, 102, 245, 0.08);
+    background: #ffffff;
+    border-color: rgba(59, 102, 245, 0.35);
+    box-shadow: var(--button-shadow);
+    transform: translateY(-1px);
+}
+
+button:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 2px rgba(30, 32, 48, 0.08);
+}
+
+button:focus-visible {
+    outline: 2px solid rgba(59, 102, 245, 0.35);
+    outline-offset: 2px;
+}
+
+.toolbar-btn,
+.icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.toolbar-btn .icon,
+.icon-btn .icon,
+.cross-btn .icon {
+    width: 16px;
+    height: 16px;
+    flex: 0 0 auto;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.toolbar-btn.primary {
+    background: var(--accent-blue);
     border-color: var(--accent-blue);
-    box-shadow: 0 0 10px rgba(59, 102, 245, 0.15);
+    color: #fff;
+}
+
+.toolbar-btn.primary:hover {
+    background: #274fd8;
+    border-color: #274fd8;
+}
+
+.toolbar-btn.status {
+    color: #0f8f7f;
+    border-color: rgba(20, 184, 166, 0.25);
+}
+
+.toolbar-btn.status .icon {
+    color: var(--accent-teal);
+}
+
+.toolbar-btn.is-active,
+.icon-btn.is-active {
+    background: rgba(20, 184, 166, 0.12);
+    border-color: var(--accent-teal);
+    color: #0f8f7f;
+    box-shadow: 0 8px 20px rgba(20, 184, 166, 0.15);
 }
 
 /* JavaScript Dynamic Selection Updates */
@@ -88,14 +155,12 @@ button[style*="background-color: cyan"] {
 #sidebarbtn {
     position: absolute;
     right: 16px;
-    width: 32px;
-    height: 32px;
+    top: 11px;
+    width: 36px;
+    height: 36px;
+    min-height: 36px;
     padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     background: rgba(59, 102, 245, 0.08);
-    /* backdrop-filter: blur(10px); */
     border-color: rgba(59, 102, 245, 0.15);
 }
 
@@ -105,17 +170,11 @@ button[style*="background-color: cyan"] {
     box-shadow: 0 0 10px rgba(59, 102, 245, 0.2);
 }
 
-#sidebarbtn::before {
-    content: "☰";
-    font-size: 16px;
-    color: var(--text-primary);
-}
-
 /* Workspace Windows Split */
 .body {
     display: flex;
     flex: 1;
-    height: calc(100vh - 52px);
+    height: calc(100vh - 58px);
     position: relative;
     background: #ffffff;
 }
@@ -209,6 +268,14 @@ textarea, #editor {
     color: #fff;
 }
 
+#close,
+#add {
+    width: 38px;
+    height: 38px;
+    min-height: 38px;
+    padding: 0;
+}
+
 /* Opened Tab List Arrays */
 #filescontainer {
     display: flex;
@@ -254,10 +321,13 @@ textarea, #editor {
 .cross-btn {
     color: var(--text-secondary);
     font-family: inherit;
-    font-weight: bold;
-    font-size: 11px;
-    padding: 2px 6px;
-    border-radius: 4px;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     transition: all 0.2s ease;
 }
 

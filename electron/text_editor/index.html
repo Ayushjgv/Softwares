@@ -8,22 +8,51 @@
 <body>
     <div class="container">
         <div class="header">
-        <button id="open">Open</button>
-        <button id="save">Save</button>
-        <button id="wrap">Word Wrap</button>
-        <button id="pin">Pin</button>
-        <!-- <button id="sidebarbtn">☰</button> -->
-        <button id="sidebarbtn"></button>
-        <button id="createsnapshot">Create Snapshot</button>
-        <button id="getsnapshot">Get Snapshot</button>
-        <button id="autosave">Autosave</button>
-        <button id="online">Online</button>
+        <button id="open" class="toolbar-btn" title="Open file" aria-label="Open file">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7.5A2.5 2.5 0 0 1 5.5 5H10l2 2h6.5A2.5 2.5 0 0 1 21 9.5v7A2.5 2.5 0 0 1 18.5 19h-13A2.5 2.5 0 0 1 3 16.5z"/><path d="M3.5 10h17"/></svg>
+            <span>Open</span>
+        </button>
+        <button id="save" class="toolbar-btn primary" title="Save file" aria-label="Save file">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h12l2 2v16H5z"/><path d="M8 3v6h8V3"/><path d="M8 21v-7h8v7"/></svg>
+            <span>Save</span>
+        </button>
+        <button id="wrap" class="toolbar-btn" title="Toggle word wrap" aria-label="Toggle word wrap">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h13a3 3 0 0 1 0 6H9"/><path d="m12 10-3 3 3 3"/><path d="M4 17h7"/></svg>
+            <span>Wrap</span>
+        </button>
+        <button id="pin" class="toolbar-btn" title="Keep window on top" aria-label="Keep window on top">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 4 5 5-4 1-4 7-2-2 7-4z"/><path d="m9 15-5 5"/></svg>
+            <span>Pin</span>
+        </button>
+        <button id="createsnapshot" class="toolbar-btn" title="Create snapshot" aria-label="Create snapshot">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h3l2-2h6l2 2h3v12H4z"/><circle cx="12" cy="13" r="3"/></svg>
+            <span>Snapshot</span>
+        </button>
+        <button id="getsnapshot" class="toolbar-btn" title="Restore snapshot" aria-label="Restore snapshot">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.7"/><path d="M4 4v6h6"/><path d="M12 8v5l3 2"/></svg>
+            <span>Restore</span>
+        </button>
+        <button id="autosave" class="toolbar-btn" title="Autosave" aria-label="Autosave">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5 10 17 19 7"/><path d="M4 5h16v14H4z"/></svg>
+            <span>Autosave</span>
+        </button>
+        <button id="online" class="toolbar-btn status" title="Online status" aria-label="Online status">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13a10 10 0 0 1 14 0"/><path d="M8.5 16.5a5 5 0 0 1 7 0"/><path d="M12 20h.01"/></svg>
+            <span>Online</span>
+        </button>
+        <button id="sidebarbtn" class="icon-btn" title="Open file panel" aria-label="Open file panel">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/></svg>
+        </button>
     </div>
 
     <div id="sidebar">
         <div>
-            <button id="close">X</button>
-            <button id="add">+</button>
+            <button id="close" class="icon-btn" title="Close panel" aria-label="Close panel">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg>
+            </button>
+            <button id="add" class="icon-btn" title="New file" aria-label="New file">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+            </button>
         </div>
         <div id="filescontainer">
 

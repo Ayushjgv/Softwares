@@ -23,6 +23,7 @@ let wordWrap = false; // Set to false initially to match standard editor default
 wrap.addEventListener('click', () => {
     wordWrap = !wordWrap;
     editor.wrap = editor.wrap === "off" ? "soft" : "off";
+    wrap.classList.toggle("is-active", wordWrap);
     updateLineNumbers(); 
 });
 
@@ -98,7 +99,9 @@ async function updatesidebar() {
         div.appendChild(nameSpan);
 
         const crossBtn = document.createElement("div");
-        crossBtn.textContent = "X";
+        crossBtn.innerHTML = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg>';
+        crossBtn.setAttribute("title", "Close file");
+        crossBtn.setAttribute("aria-label", "Close file");
         crossBtn.classList.add("cross-btn");
         div.appendChild(crossBtn);
 
@@ -194,7 +197,7 @@ editor.addEventListener("input", () => {
 // Window/UI pinning toggles
 pin.addEventListener('click', async () => {
     const ispinned = await window.api.pin();
-    pin.style.background = ispinned ? "cyan" : "white";
+    pin.classList.toggle("is-active", ispinned);
 });
 
 // Electron main shortcuts
