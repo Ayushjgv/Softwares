@@ -39,6 +39,7 @@ body {
     flex-direction: column;
     height: 100vh;
     width: 100vw;
+    min-width: 0;
 }
 
 /* Top Navigation Header */
@@ -50,11 +51,12 @@ body {
     border-bottom: 1px solid var(--glass-border);
     display: flex;
     align-items: center;
-    padding: 10px 64px 10px 16px;
+    padding: 10px 16px;
     gap: 8px;
     position: relative;
     z-index: 10;
-    overflow-x: auto;
+    flex-wrap: wrap;
+    overflow: visible;
 }
 
 /* Polished App Buttons */
@@ -99,6 +101,10 @@ button:focus-visible {
     justify-content: center;
     gap: 8px;
     white-space: nowrap;
+}
+
+.toolbar-btn {
+    flex: 0 0 auto;
 }
 
 .toolbar-btn .icon,
@@ -153,15 +159,16 @@ button[style*="background-color: cyan"] {
 
 /* Floating Sidebar Button Placement */
 #sidebarbtn {
-    position: absolute;
-    right: 16px;
-    top: 11px;
+    margin-left: auto;
     width: 36px;
     height: 36px;
     min-height: 36px;
     padding: 0;
     background: rgba(59, 102, 245, 0.08);
     border-color: rgba(59, 102, 245, 0.15);
+    position: absolute;
+    right: 5px;
+    
 }
 
 #sidebarbtn:hover {
@@ -174,7 +181,8 @@ button[style*="background-color: cyan"] {
 .body {
     display: flex;
     flex: 1;
-    height: calc(100vh - 58px);
+    min-height: 0;
+    height: auto;
     position: relative;
     background: #eef0f5;
     gap: 1px;
@@ -427,4 +435,59 @@ textarea, #editor {
 
 ::-webkit-scrollbar-thumb:hover {
     background: rgba(59, 102, 245, 0.3);
+}
+
+@media (max-width: 980px) {
+    .header {
+        gap: 6px;
+        padding: 8px 10px;
+    }
+
+    button {
+        min-height: 34px;
+        padding: 7px 10px;
+        font-size: 12px;
+    }
+
+    .toolbar-btn {
+        gap: 6px;
+    }
+
+    .toolbar-btn span {
+        display: none;
+    }
+
+    .toolbar-btn,
+    .icon-btn {
+        width: 36px;
+        height: 36px;
+        min-height: 36px;
+        padding: 0;
+    }
+
+    #sidebarbtn {
+        margin-left: 0;
+    }
+}
+
+@media (max-width: 620px) {
+    .header {
+        align-content: flex-start;
+    }
+
+    .editor-pane {
+        min-width: 220px;
+    }
+
+    .lines {
+        width: 42px;
+        padding-right: 8px;
+        font-size: 12px;
+    }
+
+    textarea,
+    #editor {
+        padding: 16px 14px 16px 12px;
+        font-size: 13px;
+    }
 }
